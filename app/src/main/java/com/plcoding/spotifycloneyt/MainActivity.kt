@@ -13,8 +13,12 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var glide: RequestManager
+
+    private val onReadyLis
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
     }
 }
