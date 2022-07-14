@@ -75,7 +75,7 @@ class FirebaseMusicSource @Inject constructor(
 
         //the flag is to it a playable item. Since it a media browser it could be anything. for eg An album to browse songs
         MediaBrowserCompat.MediaItem(desc, FLAG_PLAYABLE)
-    }
+    }.toMutableList()
 
     //when we download our data from firebase, it takes some amount of time. Since we use coroutines. We need some sort of mechanism to let us know the downloads are finished.
     //In our app we need immediate actions. So with the help of this "onReadyListeners" we can schedule tasks when download is finished

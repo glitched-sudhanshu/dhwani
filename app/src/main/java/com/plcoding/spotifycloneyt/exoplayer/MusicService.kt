@@ -1,23 +1,25 @@
 package com.plcoding.spotifycloneyt.exoplayer
 
 import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.media.MediaBrowserServiceCompat
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.plcoding.spotifyclone.other.Constans.MEDIA_ROOT_ID
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlaybackPreparer
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerEventListener
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerNotificationListener
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.multibindings.IntKey
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /**
@@ -41,6 +43,11 @@ class MusicService : MediaBrowserServiceCompat() {
 
     private lateinit var musicNotificationManager: MusicNotificationManager
 
+    companion object{
+        var currSongDuration = 0L
+        private set
+    }
+
     private val serviceJob = Job()
     //service scope will deal with the life time of the coroutines
     private val serviceScoped = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -52,8 +59,17 @@ class MusicService : MediaBrowserServiceCompat() {
 
     private var currPlayingSong: MediaMetadataCompat? = null
 
+    private var isPlayerInitialized = false
+
+    private lateinit var musicPlayerEventListener : MusicPlayerEventListener
+
     override fun onCreate() {
         super.onCreate()
+
+        //loading firebaseMediaSource to fetch data
+        serviceScoped.launch {
+            firebaseMusicSource.fetchMediaData()
+        }
 
         //to open our activity when we click on the notification
         //this is a normal intent which will lead us to the activity
@@ -75,6 +91,8 @@ class MusicService : MediaBrowserServiceCompat() {
             mediaSession.sessionToken,
             MusicPlayerNotificationListener(this)){
             //here will be a lambda function which will be called everytime when a song switches
+            //we will update the current duration of the song that is playing
+            currSongDuration = exoPlayer.duration
         }
 
         val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource){
@@ -86,11 +104,22 @@ class MusicService : MediaBrowserServiceCompat() {
 
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setPlaybackPreparer(musicPlaybackPreparer)
+        mediaSessionConnector.setQueueNavigator(MusicQueueNavigator())
         mediaSessionConnector.setPlayer(exoPlayer)
 
-        exoPlayer.addListener(MusicPlayerEventListener(this))
+        musicPlayerEventListener = MusicPlayerEventListener(this)
+        exoPlayer.addListener(musicPlayerEventListener)
         musicNotificationManager.showNotification(exoPlayer)
     }
+
+    //to pass description of the song to the notification
+    private inner class MusicQueueNavigator : TimelineQueueNavigator(mediaSession)
+    {
+        override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
+            return firebaseMusicSource.songs[windowIndex].description
+        }
+    }
+
 
     private fun preparePlayer(
         songs: List<MediaMetadataCompat>,
@@ -104,18 +133,31 @@ class MusicService : MediaBrowserServiceCompat() {
         exoPlayer.playWhenReady = playNow
     }
 
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        //when intent is removed
+        exoPlayer.stop()
+    }
+
+
     override fun onDestroy() {
         super.onDestroy()
         //remove coroutines when job is done
         serviceScoped.cancel()
+
+        exoPlayer.removeListener(musicPlayerEventListener)
+        exoPlayer.release()
     }
 
+
+    //since it is a browsable app we need to pass the ID from where all the data were actually coming from (like parent id). In our case it Firebase
     override fun onGetRoot(
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        TODO("Not yet implemented")
+        //if want to any verification of out user to access any data or to restrict any data that functionality would be handled here
+        return BrowserRoot(MEDIA_ROOT_ID, null)
     }
 
     override fun onLoadChildren(
@@ -124,6 +166,29 @@ class MusicService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        TODO("Not yet implemented")
+        when(parentId){
+            MEDIA_ROOT_ID -> {
+                //here onLoadChildren is called even before our music source is ready and that's again a case when we need a whenReady function
+                val resultsSent = firebaseMusicSource.whenReady { isInitialized-> if(isInitialized){
+                    result.sendResult(firebaseMusicSource.asMediaItems())
+                    //when we call this we want to prepare our player. So, we need to check if our player is initialized or not. If we don't do this the player will automatically start playing the music when we oen the app
+                    if(!isPlayerInitialized && firebaseMusicSource.songs.isNotEmpty()) {
+                        preparePlayer(
+                            firebaseMusicSource.songs,
+                            firebaseMusicSource.songs[0],
+                            false
+                        )
+                        isPlayerInitialized = true;
+                    }
+                } else{
+                    //if player is ready but not initialized
+                    result.sendResult(null)
+                }
+                }
+                if(!resultsSent){
+                    result.detach()
+                }
+            }
+        }
     }
 }
