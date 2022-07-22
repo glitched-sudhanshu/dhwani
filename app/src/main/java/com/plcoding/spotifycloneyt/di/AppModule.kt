@@ -5,6 +5,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.plcoding.spotifyclone.R
+import com.plcoding.spotifycloneyt.exoplayer.MusicServiceConnection
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,5 +36,12 @@ object AppModule {
                 //to make sure that image is cached with glide
             .diskCacheStrategy(DiskCacheStrategy.DATA)
     )
+
+
+    @Singleton
+    @Provides
+    fun provideMusicServiceConnection(
+        @ApplicationContext context: Context
+    ) = MusicServiceConnection(context)
 
 }
