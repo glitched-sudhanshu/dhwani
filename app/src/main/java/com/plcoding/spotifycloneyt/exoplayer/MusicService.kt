@@ -14,6 +14,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.plcoding.spotifyclone.other.Constans.MEDIA_ROOT_ID
+import com.plcoding.spotifyclone.other.Constans.NETWORK_ERROR
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlaybackPreparer
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerEventListener
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerNotificationListener
@@ -181,6 +182,7 @@ class MusicService : MediaBrowserServiceCompat() {
                         isPlayerInitialized = true;
                     }
                 } else{
+                    mediaSession.sendSessionEvent(NETWORK_ERROR, null)
                     //if player is ready but not initialized
                     result.sendResult(null)
                 }
