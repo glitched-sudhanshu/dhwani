@@ -19,6 +19,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    //here we want to bind it to the lifecycle of the activity
     private val mainViewModel : MainViewModel by viewModels()
 
     @Inject
@@ -38,15 +39,19 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    //this will change the view pager to the current song
     private fun switchViewPagerToCurrentSong(song : Song){
         val newItemIndex = swipeSongAdapter.songs.indexOf(song)
         if(newItemIndex != -1){
+            //current item being displayed in vpSong
             vpSong.currentItem = newItemIndex
             curPlayingSong = song
         }
     }
 
+    //to observe the change of sing
     private fun subscribeToObservers(){
+        //when new mediaItem is introduced
         mainViewModel.mediaItems.observe(this){
             it?.let{ result->
                 when(result.status){
@@ -54,8 +59,10 @@ class MainActivity : AppCompatActivity() {
                         result.data?.let{ songs->
                             swipeSongAdapter.songs = songs
                             if(songs.isNotEmpty()){
-                                glide.load((curPlayingSong ?: songs?.get(0)).imageUrl).into(ivCurSongImage)
+                                //loading image to view pager image view
+                                glide.load((curPlayingSong ?: songs[0]).imageUrl).into(ivCurSongImage)
                             }
+                            //return out of the observe block by default if curPlaying song is null
                             switchViewPagerToCurrentSong(curPlayingSong ?: return@observe)
                         }
                     }
@@ -65,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+        //when curPlaying song changes
         mainViewModel.curPlayingSong.observe(this){
             if(it == null)return@observe
             curPlayingSong = it.toSong()

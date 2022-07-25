@@ -33,7 +33,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             //adding listener when a song is selected
             mainViewModel.playOrToggle(it)
         }
-//        Toast.makeText(this, , Toast.LENGTH_SHORT).show()
     }
 
     private fun setupRecyclerView() = rvAllSongs.apply {
@@ -52,7 +51,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     result.data?.let { songs ->
                         //now when we are passing it to the setter it will call differ if any changes happen
                         songAdapter.songs = songs
-                        Toast.makeText(context, songs.size.toString(), Toast.LENGTH_LONG).show()
                     }
                 }
                 Status.ERROR -> Unit
