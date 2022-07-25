@@ -4,7 +4,8 @@ import android.content.Context
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.plcoding.spotifyclone.R
+import com.plcoding.spotifycloneyt.R
+import com.plcoding.spotifycloneyt.adapters.SwipeSongAdapter
 import com.plcoding.spotifycloneyt.exoplayer.MusicServiceConnection
 import dagger.Module
 import dagger.Provides
@@ -21,10 +22,11 @@ import javax.inject.Singleton
 object AppModule {
 
     //singleton means that there will be only a single instance of this function all over the application
-    @Singleton
-@Provides
+
 //@ApplicationContext because now dagger knows from where it needs to take the context
     //For every parameter there should be a provider of the parameter.
+    @Singleton
+    @Provides
     fun provideGlideInstance(
         @ApplicationContext context: Context
     ) = Glide.with(context).setDefaultRequestOptions(
@@ -43,5 +45,9 @@ object AppModule {
     fun provideMusicServiceConnection(
         @ApplicationContext context: Context
     ) = MusicServiceConnection(context)
+
+    @Singleton
+    @Provides
+    fun provideSwipeSongAdapter() = SwipeSongAdapter()
 
 }

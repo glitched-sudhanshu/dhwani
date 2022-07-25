@@ -1,6 +1,7 @@
-package com.plcoding.spotifyclone.other
+package com.plcoding.spotifycloneyt.other
 
-object Constans {
+object Constants {
+    //this needs to be same as the firebase collection name
     const val SONG_COLLECTION = "Songs"
     const val NOTIFICATION_CHANNEL_ID = "music"
     const val NOTIFICATION_ID = 1

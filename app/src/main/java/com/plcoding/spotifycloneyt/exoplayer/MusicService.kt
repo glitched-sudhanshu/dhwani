@@ -13,20 +13,19 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.plcoding.spotifyclone.other.Constans.MEDIA_ROOT_ID
-import com.plcoding.spotifyclone.other.Constans.NETWORK_ERROR
+import com.plcoding.spotifycloneyt.other.Constants.MEDIA_ROOT_ID
+import com.plcoding.spotifycloneyt.other.Constants.NETWORK_ERROR
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlaybackPreparer
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerEventListener
 import com.plcoding.spotifycloneyt.exoplayer.callbacks.MusicPlayerNotificationListener
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.multibindings.IntKey
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /**
  *MediaBrowserServiceCompat is to help us to implement such media service.
  * It is a BROWSER because you can think a music player as of a file manager, where there are files and more folders in a folder. Similarly, in a music player app we can navigate to albums, playlist etc so this MediaBrowserServiceCompat helps us to create such an environment
-*/
+ */
 
 private const val SERVICE_TAG = "MusicService"
 
@@ -34,27 +33,28 @@ private const val SERVICE_TAG = "MusicService"
 class MusicService : MediaBrowserServiceCompat() {
 
     @Inject
-    lateinit var dataSourceFactory : DefaultDataSourceFactory
+    lateinit var dataSourceFactory: DefaultDataSourceFactory
 
     @Inject
     lateinit var exoPlayer: SimpleExoPlayer
 
     @Inject
-    lateinit var firebaseMusicSource : FirebaseMusicSource
+    lateinit var firebaseMusicSource: FirebaseMusicSource
 
     private lateinit var musicNotificationManager: MusicNotificationManager
 
-    companion object{
+    companion object {
         var currSongDuration = 0L
-        private set
+            private set
     }
 
     private val serviceJob = Job()
+
     //service scope will deal with the life time of the coroutines
     private val serviceScoped = CoroutineScope(Dispatchers.Main + serviceJob)
 
-    private lateinit var mediaSession : MediaSessionCompat
-    private lateinit var mediaSessionConnector : MediaSessionConnector
+    private lateinit var mediaSession: MediaSessionCompat
+    private lateinit var mediaSessionConnector: MediaSessionConnector
 
     var isForegroundService = false
 
@@ -62,7 +62,7 @@ class MusicService : MediaBrowserServiceCompat() {
 
     private var isPlayerInitialized = false
 
-    private lateinit var musicPlayerEventListener : MusicPlayerEventListener
+    private lateinit var musicPlayerEventListener: MusicPlayerEventListener
 
     override fun onCreate() {
         super.onCreate()
@@ -81,26 +81,30 @@ class MusicService : MediaBrowserServiceCompat() {
         //if we want to play media, we have something like mediaSession which contains important info about the data about the current media session which we can use later on to communicate with our service
         mediaSession = MediaSessionCompat(this, SERVICE_TAG).apply {
             setSessionActivity(activityIntent)
-            isActive = true;
+            isActive = true
         }
 
         //to get the data of the media session
         sessionToken = mediaSession.sessionToken
 
         //notification manager of our music service
-        musicNotificationManager = MusicNotificationManager(this,
+        musicNotificationManager = MusicNotificationManager(
+            this,
             mediaSession.sessionToken,
-            MusicPlayerNotificationListener(this)){
+            MusicPlayerNotificationListener(this)
+        ) {
             //here will be a lambda function which will be called everytime when a song switches
             //we will update the current duration of the song that is playing
             currSongDuration = exoPlayer.duration
         }
 
-        val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource){
+        val musicPlaybackPreparer = MusicPlaybackPreparer(firebaseMusicSource) {
             currPlayingSong = it
-            preparePlayer(firebaseMusicSource.songs,
+            preparePlayer(
+                firebaseMusicSource.songs,
                 it,
-                true)
+                true
+            )
         }
 
         mediaSessionConnector = MediaSessionConnector(mediaSession)
@@ -114,8 +118,7 @@ class MusicService : MediaBrowserServiceCompat() {
     }
 
     //to pass description of the song to the notification
-    private inner class MusicQueueNavigator : TimelineQueueNavigator(mediaSession)
-    {
+    private inner class MusicQueueNavigator : TimelineQueueNavigator(mediaSession) {
         override fun getMediaDescription(player: Player, windowIndex: Int): MediaDescriptionCompat {
             return firebaseMusicSource.songs[windowIndex].description
         }
@@ -126,8 +129,8 @@ class MusicService : MediaBrowserServiceCompat() {
         songs: List<MediaMetadataCompat>,
         itemToPlay: MediaMetadataCompat?,
         playNow: Boolean
-    ){
-        val currSongIndex = if(currPlayingSong == null) 0 else songs.indexOf(itemToPlay)
+    ) {
+        val currSongIndex = if (currPlayingSong == null) 0 else songs.indexOf(itemToPlay)
 
         exoPlayer.prepare(firebaseMusicSource.asMediaSource(dataSourceFactory))
         exoPlayer.seekTo(currSongIndex, 0L)
@@ -167,27 +170,26 @@ class MusicService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        when(parentId){
+        when(parentId) {
             MEDIA_ROOT_ID -> {
                 //here onLoadChildren is called even before our music source is ready and that's again a case when we need a whenReady function
-                val resultsSent = firebaseMusicSource.whenReady { isInitialized-> if(isInitialized){
-                    result.sendResult(firebaseMusicSource.asMediaItems())
-                    //when we call this we want to prepare our player. So, we need to check if our player is initialized or not. If we don't do this the player will automatically start playing the music when we oen the app
-                    if(!isPlayerInitialized && firebaseMusicSource.songs.isNotEmpty()) {
-                        preparePlayer(
-                            firebaseMusicSource.songs,
-                            firebaseMusicSource.songs[0],
-                            false
-                        )
-                        isPlayerInitialized = true;
+
+                val resultsSent = firebaseMusicSource.whenReady { isInitialized ->
+                    if(isInitialized) {
+                        result.sendResult(firebaseMusicSource.asMediaItems())
+                        //when we call this we want to prepare our player. So, we need to check if our player is initialized or not. If we don't do this the player will automatically start playing the music when we oen the app
+                        if (!isPlayerInitialized && firebaseMusicSource.songs.isNotEmpty()) {
+                            preparePlayer(firebaseMusicSource.songs, firebaseMusicSource.songs[0], false)
+                            isPlayerInitialized = true
+                        }
+                    } else {
+                        mediaSession.sendSessionEvent(NETWORK_ERROR, null)
+                        //if player is ready but not initialized
+                        //if player is ready but not initialized
+                        result.sendResult(null)
                     }
-                } else{
-                    mediaSession.sendSessionEvent(NETWORK_ERROR, null)
-                    //if player is ready but not initialized
-                    result.sendResult(null)
                 }
-                }
-                if(!resultsSent){
+                if(!resultsSent) {
                     result.detach()
                 }
             }

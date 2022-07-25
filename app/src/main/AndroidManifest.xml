@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.plcoding.spotifyclone">
+    package="com.plcoding.spotifycloneyt">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name="com.plcoding.spotifycloneyt.SpotifyApplication"
@@ -12,7 +13,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
+        <service android:name="com.plcoding.spotifycloneyt.exoplayer.MusicService">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
         <activity android:name="com.plcoding.spotifycloneyt.ui.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

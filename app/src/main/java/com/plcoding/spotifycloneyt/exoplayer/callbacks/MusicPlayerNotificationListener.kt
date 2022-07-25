@@ -4,13 +4,13 @@ import android.app.Notification
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.api.Context
-import com.plcoding.spotifyclone.other.Constans.NOTIFICATION_ID
+import com.plcoding.spotifycloneyt.other.Constants.NOTIFICATION_ID
 import com.plcoding.spotifycloneyt.exoplayer.MusicService
 
 class MusicPlayerNotificationListener(
     private val musicService: MusicService
 ) : PlayerNotificationManager.NotificationListener {
+
     override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
         //if user swipes the notification if song is paused
         super.onNotificationCancelled(notificationId, dismissedByUser)
