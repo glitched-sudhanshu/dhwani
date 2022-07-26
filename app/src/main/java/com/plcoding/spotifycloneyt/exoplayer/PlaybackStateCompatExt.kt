@@ -1,6 +1,8 @@
 package com.plcoding.spotifycloneyt.exoplayer
 
+import android.os.SystemClock
 import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 
 inline val PlaybackStateCompat.isPrepared
     get() = state == PlaybackStateCompat.STATE_BUFFERING ||
@@ -18,3 +20,9 @@ inline val PlaybackStateCompat.isPlayEnabled
             (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L &&
                     //if we are in the paused state we can say that now we can play the song
                     state == PlaybackStateCompat.STATE_PAUSED)
+
+inline val PlaybackStateCompat.currentPlaybackPosition : Long
+get() = if(state == STATE_PLAYING){
+    val timeDelta = SystemClock.elapsedRealtime() - lastPositionUpdateTime
+    (position+ (timeDelta * playbackSpeed)).toLong()
+} else position
