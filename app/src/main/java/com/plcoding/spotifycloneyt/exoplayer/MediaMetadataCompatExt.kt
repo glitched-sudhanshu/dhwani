@@ -6,11 +6,11 @@ import com.plcoding.spotifycloneyt.data.entities.Song
 fun MediaMetadataCompat.toSong() : Song? {
     return description?.let{
         Song(
+            it.iconUri.toString() ?: "",
             it.mediaId ?: "",
-            it.title.toString(),
-            it.subtitle.toString(),
-            it.mediaUri.toString(),
-            it.iconUri.toString()
+            it.mediaUri.toString() ?: "",
+            it.subtitle.toString() ?: "",
+            it.title.toString() ?: "",
         )
     }
 }

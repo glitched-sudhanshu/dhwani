@@ -1,16 +1,9 @@
 package com.plcoding.spotifycloneyt.adapters
 
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.RequestManager
 import com.plcoding.spotifycloneyt.R
-import com.plcoding.spotifycloneyt.data.entities.Song
 import kotlinx.android.synthetic.main.swipe_item.view.*
-import javax.inject.Inject
 
 class SwipeSongAdapter : BaseSongAdapter(R.layout.swipe_item) {
 
@@ -20,7 +13,7 @@ class SwipeSongAdapter : BaseSongAdapter(R.layout.swipe_item) {
         val song = songs[position]
         holder.itemView.apply {
             val text = "${song.title} - ${song.subtitle}"
-            tvPrimary.text = text
+            tvSwipeSong.text = text
 
             setOnClickListener {
                 onItemClickListener?.let { click ->

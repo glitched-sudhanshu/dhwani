@@ -39,11 +39,11 @@ class MainViewModel @ViewModelInject constructor(
                     super.onChildrenLoaded(parentId, children)
                     val items = children.map {
                         Song(
-                            it.mediaId!!,
-                            it.description.title.toString(),
-                            it.description.subtitle.toString(),
-                            it.description.mediaUri.toString(),
-                            it.description.iconUri.toString()
+                            it.description.iconUri.toString() ?: "",
+                            it.mediaId!!  ?: "",
+                            it.description.mediaUri.toString() ?: "",
+                            it.description.subtitle.toString() ?: "",
+                            it.description.title.toString() ?: "",
                         )
                     }
                     _mediaItems.postValue(Resource.success(items))

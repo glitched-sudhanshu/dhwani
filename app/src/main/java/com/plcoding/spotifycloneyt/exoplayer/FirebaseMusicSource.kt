@@ -67,11 +67,11 @@ class FirebaseMusicSource @Inject constructor(
     //function for each media item, such as clicking a song will open other songs, that is a browsable application. For that we need a list of media items in our music service
     fun asMediaItems() = songs.map { song ->
         val desc = MediaDescriptionCompat.Builder()
-            .setMediaUri(song.getString(METADATA_KEY_MEDIA_URI).toUri())
-            .setTitle(song.description.title)
-            .setSubtitle(song.description.subtitle)
-            .setMediaId(song.description.mediaId)
             .setIconUri(song.description.iconUri)
+            .setMediaId(song.description.mediaId)
+            .setMediaUri(song.getString(METADATA_KEY_MEDIA_URI).toUri())
+            .setSubtitle(song.description.subtitle)
+            .setTitle(song.description.title)
             .build()
 
         //the flag is to it a playable item. Since it a media browser it could be anything. for eg An album to browse songs

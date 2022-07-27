@@ -3,6 +3,7 @@ package com.plcoding.spotifycloneyt.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -44,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         subscribeToObservers()
         vpSong.adapter = swipeSongAdapter
+
+
 
         vpSong.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback(){
            //this function is called everytime we swipe in our view pager or do any other changes

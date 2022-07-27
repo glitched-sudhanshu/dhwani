@@ -46,7 +46,7 @@ abstract class BaseSongAdapter(
     }
 
     override fun getItemCount(): Int {
-        return songs.size
+        return this.songs.size
     }
 
     protected var onItemClickListener: ((Song) -> Unit)? = null
