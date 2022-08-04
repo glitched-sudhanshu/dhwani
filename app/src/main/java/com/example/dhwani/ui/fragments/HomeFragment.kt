@@ -53,7 +53,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                 }
                 Status.ERROR -> Unit
-                Status.LOADING -> allSongsProgressBar.isVisible = true
+                Status.LOADING -> {
+                    allSongsProgressBar.isVisible = true
+                }
             }
         }
     }

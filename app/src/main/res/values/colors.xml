@@ -6,4 +6,5 @@
     <color name="mediumDarkBackground">#bdbdbd</color>
     <color name="darkBackground">#8d8d8d</color>
     <color name="lightBackground">#efefef</color>
+    <color name="BLACK">#000000</color>
 </resources>
